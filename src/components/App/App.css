@@ -1,0 +1,69 @@
+body {
+  background-size: cover;
+  background-position: center center;
+  display: flex;
+  background-color: rgb(34, 32, 32);
+  font-family: 'Lato', sans-serif;
+  font-size: 140%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  min-height: 100vh;
+}
+
+p {
+  line-height: 1.5;
+}
+
+h4 {
+  margin: 0 0 5px;
+}
+
+.container {
+  box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.7);
+  background-color: whitesmoke;
+  border: 2px solid #000;
+  padding: 30px;
+  width: 930px;
+  max-width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.container .text {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.container input {
+  padding: 12px;
+  font-size: 20px;
+  margin: 10px 0;
+  width: 550px;
+}
+
+.green {
+  color: springgreen;
+}
+
+.red {
+  background-color: crimson;
+}
+
+.underline {
+  border-bottom: 1px solid #000;
+}
+
+.word {
+  font-size: 20px;
+  margin: 2px;
+}
+
+.wpm {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  text-align: right;
+  color: whitesmoke;
+}

@@ -1,0 +1,33 @@
+.keys {
+  display: flex;
+  min-height: 11vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.key {
+  flex-direction: row;
+  flex: 1;
+  border: 0.4rem solid black;
+  border-radius: 0.2rem;
+  margin: 0.1rem;
+  font-size: 1.1rem;
+  padding: 1rem 0.1rem;
+  transition: all 0.07s ease;
+  width: 4rem;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 0.5rem black;
+}
+
+.playing {
+  transform: scale(1.1);
+  border-color: #f5f5f5;
+  box-shadow: 0 0 0.1rem #f5f5f5;
+}
+
+kbd {
+  display: block;
+  font-size: 1rem;
+}
