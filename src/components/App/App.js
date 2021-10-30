@@ -1,6 +1,12 @@
 import './App.css';
 import { Keys } from 'components';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import { useEffect } from 'react/cjs/react.development';
+const fetchData = async () => {
+  const data = await fetch('https://type.fit/api/quotes');
+  let response = await data.json();
+  return response.map(item => item.text);
+};
 export const App = () => {
   const [started, setStarted] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -10,39 +16,53 @@ export const App = () => {
   const [completed, setCompleted] = useState(false);
   const [completedWords, setCompletedWords] = useState([]);
   const [wpm, setWpm] = useState(0);
+  const [errors, setErrors] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [lastLetter, setLastLetter] = useState('');
-  const inputRef = useRef();
-
-  const startGame = () => {
+  const [diffWpm, setDiffWpm] = useState(0);
+  const [idx, setIdx] = useState(0);
+  const [freeze, setFreeze] = useState(false);
+  const startGame = async () => {
     setStarted(true);
-    const text_list = [
-      `You never read a book on psychology, Tippy. You didn't need to. You knew by some divine instinct that you can make more friends in two months by becoming genuinely interested in other people than you can in two years by trying to get other people interested in you.`,
-      `I know more about the private lives of celebrities than I do about any governmental policy that will actually affect me. I'm interested in things that are none of my business, and I'm bored by things that are important to know.`,
-      `A spider.`,
-      `As customers of all races, nationalities, and cultures visit the Dekalb Farmers Market by the thousands, I doubt that many stand in awe and contemplate the meaning of its existence. But in the capital of the Sunbelt South, the quiet revolution of immigration and food continues to upset and redefine the meanings of local, regional, and global identity.`,
-      `Outside of two men on a train platform there's nothing in sight. They're waiting for spring to come, smoking down the track. The world could come to an end tonight, but that's alright. She could still be there sleeping when I get back.`,
-      `I'm a broke-nose fighter. I'm a loose-lipped liar. Searching for the edge of darkness. But all I get is just tired. I went looking for attention. In all the wrong places. I was needing a redemption. And all I got was just cages.`,
-    ];
+    let text_list = JSON.parse(localStorage.getItem('quotes_data'));
+    if (!localStorage.getItem('quotes_data')) {
+      text_list = await fetchData();
+      localStorage.setItem('quotes_data', JSON.stringify(text_list));
+    }
     const newText = text_list[Math.floor(Math.random() * text_list.length)];
     setText(newText);
     const newWords = newText.split(' ');
     setWords(newWords);
     setStartTime(Date.now());
     setCompletedWords([]);
-    console.log(newWords);
   };
   const handleInputChange = e => {
     const newInputValue = e.target.value;
     const newLastLetter = newInputValue[newInputValue.length - 1];
-    console.log(newLastLetter);
     const currentWord = words[0];
-    console.log(completedWords);
+
+    if (newLastLetter !== ' ') {
+      if (newLastLetter === currentWord.at(idx)) {
+        setIdx(idx + 1);
+        setFreeze(false);
+      } else if (e.nativeEvent.inputType === 'deleteContentBackward') {
+        setErrors(errors);
+      } else {
+        if (!!freeze) {
+          setErrors(errors);
+        } else {
+          setErrors(errors + 1);
+          setFreeze(true);
+        }
+      }
+    } else {
+      setIdx(0);
+    }
+
     if (newLastLetter === ' ' || newLastLetter === '.') {
       if (newInputValue.trim() === currentWord) {
         const newWords = [...words.slice(1)];
         const newCompletedWords = [...completedWords, currentWord];
-
         setWords(newWords);
         setCompletedWords(newCompletedWords);
         setCompleted(newWords.length === 0);
@@ -52,36 +72,52 @@ export const App = () => {
       setInputValue(newInputValue);
       setLastLetter(newLastLetter);
     }
-    calculateWPM();
   };
 
   const calculateWPM = () => {
     const now = Date.now();
     const diff = (now - startTime) / 1000 / 60; // 1000 ms / 60 s
-
-    // every word is considered to have 5 letters
-    // so here we are getting all the letters in the words and divide them by 5
-    // "my" shouldn't be counted as same as "deinstitutionalization"
     const wordsTyped = Math.ceil(
       completedWords.reduce((acc, word) => (acc += word.length), 0) / 5,
     );
-
-    // calculating the wpm
-    const wpm = Math.ceil(wordsTyped / diff);
-    setWpm(wpm);
+    let oldWpm = wpm;
+    let newWpm = Math.ceil(wordsTyped / diff);
+    setWpm(newWpm);
+    let wpmDiff = newWpm - oldWpm;
+    setDiffWpm(wpmDiff);
     setTimeElapsed(diff);
   };
+
+  // const calculateCPM = () => {};
+
+  useEffect(() => {
+    if (!!completed) {
+      setErrors(0);
+      calculateWPM();
+      startGame();
+    }
+  }, [completed]);
 
   return (
     <>
       {started ? (
         <div>
           <div className="wpm">
-            <strong>WPM: </strong>
-            {wpm}
+            <strong>WPM </strong>
+            {wpm}{' '}
+            {diffWpm >= 0 ? (
+              <span className="green"> ⬆ {diffWpm}</span>
+            ) : (
+              <span className="red"> ⬇ {diffWpm}</span>
+            )}
             <br />
-            <strong>Time: </strong>
+            <strong>Time </strong>
             {Math.floor(timeElapsed * 60)}s
+            <br />
+            <strong>Errors </strong>
+            {errors}
+            {''}
+            {/* <span className={diffErrors >=0 ? 'green' : 'red'}>{diffErrors}</span> */}
           </div>
           <div className="container">
             <h4>Type the text below</h4>
@@ -110,6 +146,7 @@ export const App = () => {
                       const isCurrentWord = w_idx === completedWords.length;
                       const isWronglyTyped = letter !== inputValue[l_idx];
                       const shouldBeHighlighted = l_idx < inputValue.length;
+
                       return (
                         <span
                           className={`letter ${
@@ -119,6 +156,7 @@ export const App = () => {
                                 : 'green'
                               : ''
                           }`}
+                          //
                           key={l_idx}
                         >
                           {letter}
@@ -140,8 +178,22 @@ export const App = () => {
         </div>
       ) : (
         <>
-          <div>Welcome to the Typing Game</div>
-          <button onClick={startGame}>Start Game</button>
+          <div className="container">
+            <h2>Welcome to the Typing game</h2>
+            <p>
+              <strong>Rules:</strong> <br />
+              Type in the input field the highlighted word. <br />
+              The correct words will turn <span className="green">green</span>.
+              <br />
+              Incorrect letters will turn <span className="red">red</span>.
+              <br />
+              <br />
+              Have fun! 😃
+            </p>
+            <button className="start-btn" onClick={startGame}>
+              Start game
+            </button>
+          </div>
         </>
       )}
     </>
