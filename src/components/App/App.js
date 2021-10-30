@@ -19,7 +19,6 @@ export const App = () => {
   const [cpm, setCpm] = useState(0);
   const [errors, setErrors] = useState(0);
   const [inputValue, setInputValue] = useState('');
-  const [lastLetter, setLastLetter] = useState('');
   const [diffWpm, setDiffWpm] = useState(0);
   const [diffCpm, setDiffCpm] = useState(0);
   const [idx, setIdx] = useState(0);
@@ -72,7 +71,6 @@ export const App = () => {
       }
     } else {
       setInputValue(newInputValue);
-      setLastLetter(newLastLetter);
     }
   };
 
@@ -103,6 +101,7 @@ export const App = () => {
       calculateStats();
       startGame();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completed]);
 
   return (
