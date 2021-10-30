@@ -1,7 +1,6 @@
 import './App.css';
 import { Keys } from 'components';
-import { useState } from 'react';
-import { useEffect } from 'react/cjs/react.development';
+import { useState, useEffect } from 'react';
 const fetchData = async () => {
   const data = await fetch('https://type.fit/api/quotes');
   let response = await data.json();
