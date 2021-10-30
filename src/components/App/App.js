@@ -16,10 +16,12 @@ export const App = () => {
   const [completed, setCompleted] = useState(false);
   const [completedWords, setCompletedWords] = useState([]);
   const [wpm, setWpm] = useState(0);
+  const [cpm, setCpm] = useState(0);
   const [errors, setErrors] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [lastLetter, setLastLetter] = useState('');
   const [diffWpm, setDiffWpm] = useState(0);
+  const [diffCpm, setDiffCpm] = useState(0);
   const [idx, setIdx] = useState(0);
   const [freeze, setFreeze] = useState(false);
   const startGame = async () => {
@@ -74,26 +76,31 @@ export const App = () => {
     }
   };
 
-  const calculateWPM = () => {
+  const calculateStats = () => {
     const now = Date.now();
     const diff = (now - startTime) / 1000 / 60; // 1000 ms / 60 s
     const wordsTyped = Math.ceil(
       completedWords.reduce((acc, word) => (acc += word.length), 0) / 5,
     );
-    let oldWpm = wpm;
+    const charTyped = Math.ceil(
+      completedWords.reduce((acc, word) => (acc += word.length), 0),
+    );
+
     let newWpm = Math.ceil(wordsTyped / diff);
+    let newCpm = Math.ceil(charTyped / diff);
+    let wpmDiff = newWpm - wpm;
+    let cpmDiff = newCpm - cpm;
     setWpm(newWpm);
-    let wpmDiff = newWpm - oldWpm;
+    setCpm(newCpm);
+    setDiffCpm(cpmDiff);
     setDiffWpm(wpmDiff);
     setTimeElapsed(diff);
   };
 
-  // const calculateCPM = () => {};
-
   useEffect(() => {
     if (!!completed) {
       setErrors(0);
-      calculateWPM();
+      calculateStats();
       startGame();
     }
   }, [completed]);
@@ -109,6 +116,14 @@ export const App = () => {
               <span className="green"> ⬆ {diffWpm}</span>
             ) : (
               <span className="red"> ⬇ {diffWpm}</span>
+            )}
+            <br />
+            <strong>CPM </strong>
+            {cpm}{' '}
+            {diffCpm >= 0 ? (
+              <span className="green"> ⬆ {diffCpm}</span>
+            ) : (
+              <span className="red"> ⬇ {diffCpm}</span>
             )}
             <br />
             <strong>Time </strong>
