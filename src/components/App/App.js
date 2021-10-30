@@ -20,7 +20,7 @@ export const App = () => {
   const [inputValue, setInputValue] = useState('');
   const [diffWpm, setDiffWpm] = useState(0);
   const [diffCpm, setDiffCpm] = useState(0);
-  const [idx, setIdx] = useState(0);
+  const [idx, setIdx] = useState();
   const [freeze, setFreeze] = useState(false);
   const startGame = async () => {
     setStarted(true);
@@ -34,6 +34,7 @@ export const App = () => {
     const newWords = newText.split(' ');
     setWords(newWords);
     setStartTime(Date.now());
+    setIdx(0);
     setCompletedWords([]);
   };
   const handleInputChange = e => {
